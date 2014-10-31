@@ -28,181 +28,186 @@ import android.view.ContextThemeWrapper;
 /**
  * Styles for the GraphView
  * Important: Use {@link com.jjoe64.graphview.GraphViewSeries.GraphViewSeriesStyle} for series-specify styling
- *
  */
 public class GraphViewStyle {
-	private int verticalLabelsColor;
-	private int horizontalLabelsColor;
-	private int gridColor;
-	private GridStyle gridStyle = GridStyle.BOTH;
-	private float textSize;
-	private int verticalLabelsWidth;
-	private int numVerticalLabels;
-	private int numHorizontalLabels;
-	private int legendWidth;
-	private int legendBorder;
-	private int legendSpacing;
-	private int legendMarginBottom;
-	private Align verticalLabelsAlign;
+    private int verticalLabelsColor;
+    private int horizontalLabelsColor;
+    private int gridColor;
+    private GridStyle gridStyle = GridStyle.BOTH;
+    private float textSize;
+    private int verticalLabelsWidth;
+    private int numVerticalLabels;
+    private int numHorizontalLabels;
+    private int legendWidth;
+    private int legendBorder;
+    private int legendSpacing;
+    private int legendMarginBottom;
+    private Align verticalLabelsAlign;
 
-	public GraphViewStyle() {
-		setDefaults();
-	}
+    public GraphViewStyle() {
+        setDefaults();
+    }
 
-	public GraphViewStyle(int vLabelsColor, int hLabelsColor, int gridColor) {
-		setDefaults();
-		this.verticalLabelsColor = vLabelsColor;
-		this.horizontalLabelsColor = hLabelsColor;
-		this.gridColor = gridColor;
-	}
+    public GraphViewStyle(int vLabelsColor, int hLabelsColor, int gridColor) {
+        setDefaults();
+        this.verticalLabelsColor = vLabelsColor;
+        this.horizontalLabelsColor = hLabelsColor;
+        this.gridColor = gridColor;
+    }
 
-	public int getGridColor() {
-		return gridColor;
-	}
-	
-	public GridStyle getGridStyle() {
-		return gridStyle;
-	}
+    public int getGridColor() {
+        return gridColor;
+    }
 
-	public int getHorizontalLabelsColor() {
-		return horizontalLabelsColor;
-	}
+    public GridStyle getGridStyle() {
+        return gridStyle;
+    }
 
-	public int getLegendBorder() {
-		return legendBorder;
-	}
+    public int getHorizontalLabelsColor() {
+        return horizontalLabelsColor;
+    }
 
-	public int getLegendSpacing() {
-		return legendSpacing;
-	}
+    public int getLegendBorder() {
+        return legendBorder;
+    }
 
-	public int getLegendWidth() {
-		return legendWidth;
-	}
+    public int getLegendSpacing() {
+        return legendSpacing;
+    }
 
-	public int getLegendMarginBottom() {
-		return legendMarginBottom;
-	}
+    public int getLegendWidth() {
+        return legendWidth;
+    }
 
-	public int getNumHorizontalLabels() {
-		return numHorizontalLabels;
-	}
+    public int getLegendMarginBottom() {
+        return legendMarginBottom;
+    }
 
-	public int getNumVerticalLabels() {
-		return numVerticalLabels;
-	}
+    public int getNumHorizontalLabels() {
+        return numHorizontalLabels;
+    }
 
-	public float getTextSize() {
-		return textSize;
-	}
+    public int getNumVerticalLabels() {
+        return numVerticalLabels;
+    }
 
-	public Align getVerticalLabelsAlign() {
-		return verticalLabelsAlign;
-	}
+    public float getTextSize() {
+        return textSize;
+    }
 
-	public int getVerticalLabelsColor() {
-		return verticalLabelsColor;
-	}
+    public Align getVerticalLabelsAlign() {
+        return verticalLabelsAlign;
+    }
 
-	public int getVerticalLabelsWidth() {
-		return verticalLabelsWidth;
-	}
+    public int getVerticalLabelsColor() {
+        return verticalLabelsColor;
+    }
 
-	private void setDefaults() {
-		verticalLabelsColor = Color.WHITE;
-		horizontalLabelsColor = Color.WHITE;
-		gridColor = Color.DKGRAY;
-		textSize = 30f;
-		legendWidth = 120;
-		legendBorder = 10;
-		legendSpacing = 10;
-		legendMarginBottom = 0;
-		verticalLabelsAlign = Align.LEFT;
-	}
+    public int getVerticalLabelsWidth() {
+        return verticalLabelsWidth;
+    }
 
-	public void setGridStyle(GridStyle style) {
-		gridStyle = style;
-	}
-	
-	public void setGridColor(int c) {
-		gridColor = c;
-	}
+    private void setDefaults() {
+        verticalLabelsColor = Color.WHITE;
+        horizontalLabelsColor = Color.WHITE;
+        gridColor = Color.DKGRAY;
+        textSize = 30f;
+        legendWidth = 120;
+        legendBorder = 10;
+        legendSpacing = 10;
+        legendMarginBottom = 0;
+        verticalLabelsAlign = Align.LEFT;
+    }
 
-	public void setHorizontalLabelsColor(int c) {
-		horizontalLabelsColor = c;
-	}
+    public void setGridStyle(GridStyle style) {
+        gridStyle = style;
+    }
 
-	public void setLegendBorder(int legendBorder) {
-		this.legendBorder = legendBorder;
-	}
+    public void setGridColor(int c) {
+        gridColor = c;
+    }
 
-	public void setLegendSpacing(int legendSpacing) {
-		this.legendSpacing = legendSpacing;
-	}
+    public void setHorizontalLabelsColor(int c) {
+        horizontalLabelsColor = c;
+    }
 
-	public void setLegendWidth(int legendWidth) {
-		this.legendWidth = legendWidth;
-	}
+    public void setLegendBorder(int legendBorder) {
+        this.legendBorder = legendBorder;
+    }
 
-	public void setLegendMarginBottom(int legendMarginBottom) {
-		this.legendMarginBottom = legendMarginBottom;
-	}
+    public void setLegendSpacing(int legendSpacing) {
+        this.legendSpacing = legendSpacing;
+    }
 
-	/**
-	 * @param numHorizontalLabels 0 = auto
-	 */
-	public void setNumHorizontalLabels(int numHorizontalLabels) {
-		this.numHorizontalLabels = numHorizontalLabels;
-	}
+    public void setLegendWidth(int legendWidth) {
+        this.legendWidth = legendWidth;
+    }
 
-	/**
-	 * @param numVerticalLabels 0 = auto
-	 */
-	public void setNumVerticalLabels(int numVerticalLabels) {
-		this.numVerticalLabels = numVerticalLabels;
-	}
+    public void setLegendMarginBottom(int legendMarginBottom) {
+        this.legendMarginBottom = legendMarginBottom;
+    }
 
-	public void setTextSize(float textSize) {
-		this.textSize = textSize;
-	}
+    /**
+     * @param numHorizontalLabels 0 = auto
+     */
+    public void setNumHorizontalLabels(int numHorizontalLabels) {
+        this.numHorizontalLabels = numHorizontalLabels;
+    }
 
-	public void setVerticalLabelsAlign(Align verticalLabelsAlign) {
-		this.verticalLabelsAlign = verticalLabelsAlign;
-	}
+    /**
+     * @param numVerticalLabels 0 = auto
+     */
+    public void setNumVerticalLabels(int numVerticalLabels) {
+        this.numVerticalLabels = numVerticalLabels;
+    }
 
-	public void setVerticalLabelsColor(int c) {
-		verticalLabelsColor = c;
-	}
+    public void setTextSize(float textSize) {
+        this.textSize = textSize;
+    }
 
-	/**
-	 * @param verticalLabelsWidth 0 = auto
-	 */
-	public void setVerticalLabelsWidth(int verticalLabelsWidth) {
-		this.verticalLabelsWidth = verticalLabelsWidth;
-	}
+    public void setVerticalLabelsAlign(Align verticalLabelsAlign) {
+        this.verticalLabelsAlign = verticalLabelsAlign;
+    }
 
-	/**
-	 * tries to get the theme's font color and use it for labels
-	 * @param context must be instance of ContextThemeWrapper
-	 */
-	public void useTextColorFromTheme(Context context) {
-		if (context instanceof ContextThemeWrapper) {
-			TypedArray array = ((ContextThemeWrapper) context).getTheme().obtainStyledAttributes(new int[] {android.R.attr.textColorPrimary});
-			int color = array.getColor(0, getVerticalLabelsColor());
-			array.recycle();
+    public void setVerticalLabelsColor(int c) {
+        verticalLabelsColor = c;
+    }
 
-			setVerticalLabelsColor(color);
-			setHorizontalLabelsColor(color);
-		}
-	}
+    /**
+     * @param verticalLabelsWidth 0 = auto
+     */
+    public void setVerticalLabelsWidth(int verticalLabelsWidth) {
+        this.verticalLabelsWidth = verticalLabelsWidth;
+    }
+
+    /**
+     * tries to get the theme's font color and use it for labels
+     *
+     * @param context must be instance of ContextThemeWrapper
+     */
+    public void useTextColorFromTheme(Context context) {
+        if (context instanceof ContextThemeWrapper) {
+            TypedArray array = ((ContextThemeWrapper) context).getTheme().obtainStyledAttributes(new int[]{android.R.attr.textColorPrimary});
+            int color = array.getColor(0, getVerticalLabelsColor());
+            array.recycle();
+
+            setVerticalLabelsColor(color);
+            setHorizontalLabelsColor(color);
+        }
+    }
 
     /**
      * Definition which lines will be drawn in the background
      */
-	public enum GridStyle {
-		BOTH, VERTICAL, HORIZONTAL, NONE;
+    public enum GridStyle {
+        BOTH, VERTICAL, HORIZONTAL, NONE;
 
-        public boolean drawVertical() { return this == BOTH || this == VERTICAL && this != NONE; }
-        public boolean drawHorizontal() { return this == BOTH || this == HORIZONTAL && this != NONE; }
-	}
+        public boolean drawVertical() {
+            return this == BOTH || this == VERTICAL && this != NONE;
+        }
+
+        public boolean drawHorizontal() {
+            return this == BOTH || this == HORIZONTAL && this != NONE;
+        }
+    }
 }

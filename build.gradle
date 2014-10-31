@@ -1,12 +1,20 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.13.+'
+    }
+}
+
 apply plugin: 'android-library'
 
 android {
-    compileSdkVersion 20
-    buildToolsVersion "20"
-
+    compileSdkVersion 17
+    buildToolsVersion '19.1.0'
     defaultConfig {
-        minSdkVersion 7
-        targetSdkVersion 20
+        minSdkVersion 17
+        targetSdkVersion 19
         versionCode 2
         versionName "1.0"
     }
@@ -15,6 +23,8 @@ android {
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
+    }
+    productFlavors {
     }
 }
 
@@ -30,9 +40,8 @@ task makeJar(type: Copy) {
     from('build/intermediates/bundles/release/')
     into('build/libs/')
     include('classes.jar')
-    rename ('classes.jar', 'myCompiledLibrary.jar')
+    rename('classes.jar', 'myCompiledLibrary.jar')
 }
 
 makeJar.dependsOn(clearJar, build)
-
-apply from: './maven_push.gradle'
+//apply from: 'maven_push.gradle'
