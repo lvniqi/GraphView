@@ -38,6 +38,7 @@ import com.jjoe64.graphview.compatible.ScaleGestureDetector;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Handler;
 
 /**
  * GraphView is a Android View for creating zoomable and scrollable graphs.
@@ -61,7 +62,18 @@ abstract public class GraphView extends LinearLayout {
         private float graphwidth;
         private float graphheight;
         private boolean scrollingStarted;
+        //触摸点宽度
+        private float pointer_width = 0;
+        //触摸宽度模式(x1>x0 or x0>x1)
+        private boolean pointer_width_mode;
 
+        //触摸点宽度
+        private float pointer_height = 0;
+        //触摸宽度模式(x1>x0 or x0>x1)
+        private boolean pointer_height_mode;
+
+        //触摸模式
+        private int touch_mode = 0;
         /**
          * @param context
          */
@@ -187,6 +199,62 @@ abstract public class GraphView extends LinearLayout {
             invalidate();
         }
 
+        private void OnPointersTouch(MotionEvent event){
+
+            boolean change = false;
+            float now_x =event.getX(0) - event.getX(1);
+            float now_y =event.getY(0) - event.getY(1);
+            //if the point1 and point0 don't have cross
+            if( (now_x >0 && pointer_width_mode)
+                    ||(now_x <0 && !pointer_width_mode)) {
+                if (Math.abs(pointer_width) > 10
+                        && Math.abs(now_x) > 10
+                        && Math.abs(pointer_width-now_x) >4) {
+                    double minX = getMinX(true);
+                    double maxX = getMaxX(true);
+                    //goto center
+                    viewportStart += viewportSize / 2;
+                    viewportSize *= Math.abs(pointer_width) / Math.abs(now_x);
+                    //goto back
+                    viewportStart -= viewportSize / 2;
+                    if (viewportStart < minX) {
+                        viewportStart = minX;
+                    }
+                    if (viewportStart + viewportSize > maxX) {
+                        viewportSize = maxX - viewportStart;
+                    }
+                    change = true;
+                }
+            }
+            if( (now_y >0 && pointer_height_mode)
+                    ||(now_y <0 && !pointer_height_mode)) {
+                if (Math.abs(pointer_height) > 15
+                        && Math.abs(now_y) > 15
+                        && Math.abs(pointer_height-now_y) >4) {
+                    double minY = getMinY();
+                    double maxY = getMaxY();
+                    double diffY = -(maxY-minY);
+                    double size = manualMaxYValue-manualMinYValue;
+                    double y0_1 =(event.getY(0)+event.getY(1))/2;
+                    y0_1 = y0_1/diffY;
+                    double middle = manualMaxYValue - y0_1*size;
+                    size *= pointer_height/now_y;
+                    manualMinYValue = middle - size/2 ;
+                    manualMaxYValue = middle + size/2 ;
+                    change = true;
+
+                }
+            }
+            //save width
+            pointer_width = now_x;
+            pointer_height = now_y;
+            if(change){
+                if (!staticHorizontalLabels) horlabels = null;
+                if (!staticVerticalLabels) verlabels = null;
+                viewVerLabels.invalidate();
+                invalidate();
+            }
+        }
         /**
          * @param event
          */
@@ -195,51 +263,73 @@ abstract public class GraphView extends LinearLayout {
             if (!isScrollable() || isDisableTouch()) {
                 return super.onTouchEvent(event);
             }
-
             boolean handled = false;
-            // first scale
-            if (scalable && scaleDetector != null) {
-                scaleDetector.onTouchEvent(event);
-                handled = scaleDetector.isInProgress();
-            }
-            if (!handled) {
-                //Log.d("GraphView", "on touch event scale not handled+"+lastTouchEventX);
-                // if not scaled, scroll
-                if ((event.getAction() & MotionEvent.ACTION_DOWN) == MotionEvent.ACTION_DOWN &&
-                        (event.getAction() & MotionEvent.ACTION_MOVE) == 0) {
+            switch (event.getAction()&MotionEvent.ACTION_MASK){
+            //Log.d("GraphView", "on touch event scale not handled+"+lastTouchEventX);
+            // if not scaled, scroll
+                case MotionEvent.ACTION_DOWN:
+                    touch_mode = 1;
                     scrollingStarted = true;
                     handled = true;
-                }
-                if ((event.getAction() & MotionEvent.ACTION_UP) == MotionEvent.ACTION_UP) {
+                    break;
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    touch_mode += 1;
+                    scrollingStarted = false;
+                    lastTouchEventX = 0;
+                    lastTouchEventY = 0;
+                    pointer_width = event.getX(0) - event.getX(1);
+                    pointer_height = event.getY(0) - event.getY(1);
+                    if(pointer_width>0){
+                        pointer_width_mode = true;
+                    }
+                    else {
+                        pointer_width_mode = false;
+                    }
+                    if(pointer_height>0){
+                        pointer_height_mode = true;
+                    }
+                    else {
+                        pointer_height_mode = false;
+                    }
+                    break;
+                case MotionEvent.ACTION_POINTER_UP:
+                    touch_mode -= 1;
+                    if( touch_mode == 1) {
+                        scrollingStarted = true;
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    touch_mode = 0;
                     scrollingStarted = false;
                     lastTouchEventX = 0;
                     lastTouchEventY = 0;
                     handled = true;
-                }
-                if ((event.getAction() & MotionEvent.ACTION_MOVE) == MotionEvent.ACTION_MOVE) {
-                    if (scrollingStarted) {
-                        if (lastTouchEventX != 0 || lastTouchEventY != 0) {
-                            int x_different = (int)event.getX() - lastTouchEventX;
-                            int y_different = (int)event.getY() - lastTouchEventY;
-                            if(x_different >1
-                                    || x_different<-1
-                                    ||y_different >1
-                                    || y_different<-1) {
-                                onMoveGesture(x_different,y_different);
-                            }
+                case MotionEvent.ACTION_MOVE:
+                        if (touch_mode >= 2) {
+
+                            OnPointersTouch(event);
+
                         }
-                        lastTouchEventX = (int)event.getX();
-                        lastTouchEventY = (int)event.getY();
-                        handled = true;
-                    }
-                }
-                if (handled)
-                    invalidate();
-            } else {
-                // currently scaling
-                scrollingStarted = false;
-                lastTouchEventX = 0;
-                lastTouchEventY = 0;
+                        else if(scrollingStarted) {
+
+                            if (lastTouchEventX != 0 || lastTouchEventY != 0) {
+                                int x_different = (int) event.getX() - lastTouchEventX;
+                                int y_different = (int) event.getY() - lastTouchEventY;
+                                if (x_different > 1
+                                        || x_different < -1
+                                        || y_different > 1
+                                        || y_different < -1) {
+                                    onMoveGesture(x_different, y_different);
+                                }
+                            }
+                            lastTouchEventX = (int) event.getX();
+                            lastTouchEventY = (int) event.getY();
+                            handled = true;
+                        }break;
+
+            }
+            if (handled) {
+                invalidate();
             }
             return handled;
         }
