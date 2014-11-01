@@ -233,11 +233,8 @@ abstract public class GraphView extends LinearLayout {
                         && Math.abs(pointer_height-now_y) >4) {
                     double minY = getMinY();
                     double maxY = getMaxY();
-                    double diffY = -(maxY-minY);
                     double size = manualMaxYValue-manualMinYValue;
-                    double y0_1 =(event.getY(0)+event.getY(1))/2;
-                    y0_1 = y0_1/diffY;
-                    double middle = manualMaxYValue - y0_1*size;
+                    double middle = (manualMinYValue + manualMaxYValue) /2;
                     size *= pointer_height/now_y;
                     manualMinYValue = middle - size/2 ;
                     manualMaxYValue = middle + size/2 ;
