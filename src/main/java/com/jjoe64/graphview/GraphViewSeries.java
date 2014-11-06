@@ -62,7 +62,40 @@ public class GraphViewSeries {
 
     final String description;
     final GraphViewSeriesStyle style;
+    private boolean show_max = false;
+    private boolean show_min = false;
+    private boolean sign_curve = false;
+    public float series_max;
+    public float series_min;
     GraphViewDataInterface[] values;
+    //show_max?
+    public boolean GetShowMaxFlag(){return show_max;}
+    //show_max!
+    public void SetShowMaxFlag(boolean flag){show_max = flag;
+        for (GraphView g : graphViews) {
+            g.redrawAll();
+        }
+    }
+    //show_min?
+    public boolean GetShowMinFlag(){return show_min;}
+    //show_min!
+    public void SetShowMinFlag(boolean flag){
+        show_min = flag;
+        for (GraphView g : graphViews) {
+            g.redrawAll();
+        }
+    }
+    //sign curve?
+    public boolean GetSignCurveFlag(){return sign_curve;}
+    //sign curve!
+    public void SetSignCurveFlag(boolean flag){
+        sign_curve = flag;
+        for (GraphView g : graphViews) {
+            g.redrawAll();
+        }
+    }
+    public float GetSeriesMax(){return series_max;}
+    public float GetSeriesMin(){return series_min;}
     private final List<GraphView> graphViews = new ArrayList<GraphView>();
 
     /**
@@ -74,9 +107,30 @@ public class GraphViewSeries {
         description = null;
         style = new GraphViewSeriesStyle();
         this.values = values;
+        InitMaxMin(values);
         checkValueOrder();
     }
-
+    //get maxmum and minmum
+    public void CmpMaxMin(GraphViewDataInterface value){
+        if(value.getY()>series_max){
+            series_max = (float)value.getY();
+        }
+        if(value.getY()<series_min){
+            series_min = (float) value.getY();
+        }
+    }
+    // init maxmum and minmum
+    public void InitMaxMin(GraphViewDataInterface[] values){
+        for(int i=0;i<values.length;i++){
+            if(i == 0) {
+                series_max = (float) values[0].getY();
+                series_min = (float) values[0].getY();
+            }
+            else{
+                CmpMaxMin(values[i]);
+            }
+        }
+    }
     /**
      * create a series with predefined options
      *
@@ -92,6 +146,8 @@ public class GraphViewSeries {
         }
         this.style = style;
         this.values = values;
+        //init max and min
+        InitMaxMin(values);
         checkValueOrder();
     }
 
@@ -123,6 +179,8 @@ public class GraphViewSeries {
 
         newValues[values.length] = value;
         values = newValues;
+        //update max min
+        CmpMaxMin(value);
         for (GraphView g : graphViews) {
             if (scrollToEnd) {
                 g.scrollToEnd();
@@ -160,7 +218,8 @@ public class GraphViewSeries {
             }
             values = newValues;
         }
-
+        //update max min
+        CmpMaxMin(value);
         // update linked graph views
         for (GraphView g : graphViews) {
             if (scrollToEnd) {
@@ -194,6 +253,8 @@ public class GraphViewSeries {
      */
     public void resetData(GraphViewDataInterface[] values) {
         this.values = values;
+        //update max min
+        InitMaxMin(values);
         checkValueOrder();
         for (GraphView g : graphViews) {
             g.redrawAll();

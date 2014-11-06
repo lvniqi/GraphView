@@ -24,6 +24,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
@@ -167,11 +168,53 @@ abstract public class GraphView extends LinearLayout {
 
             for (int i = 0; i < graphSeries.size(); i++) {
                 drawSeries(canvas, _values(i), graphwidth, graphheight, border, minX, minY, diffX, diffY, horstart, graphSeries.get(i).style);
+                //if someone want to show max
+                double y_min = border + graphheight - graphheight * ((graphSeries.get(i).GetSeriesMin()) - minY) / diffY;
+                double y_max = border + graphheight - graphheight * ((graphSeries.get(i).GetSeriesMax()) - minY) / diffY;
+                if(graphSeries.get(i).GetShowMaxFlag()) {
+                    if (y_max > border && y_max < graphheight + border) {
+                        paint.setColor(graphSeries.get(i).style.color);
+                        paint.setStrokeWidth(0);
+                        for (int j = 0; j < graphwidth; j += 25) {
+                            canvas.drawLine(j, (float) (y_max - 2), (float) j + 5, (float) (y_max - 2), paint);
+                        }
+                    }
+                }
+                //if someone want to show min
+                if(graphSeries.get(i).GetShowMinFlag()) {
+                    if (y_min > border && y_min < graphheight + border) {
+                        paint.setColor(graphSeries.get(i).style.color);
+                        paint.setStrokeWidth(0);
+                        for (int j = 0; j < graphwidth; j += 25) {
+                            canvas.drawLine(j, (float) (y_min - 2), (float) j + 5, (float) (y_min - 2), paint);
+                        }
+                    }
+                }
+                //if someone want to sign the curve
+                if(graphSeries.get(i).GetSignCurveFlag()) {
+                    paint.setColor(graphSeries.get(i).style.color);
+                    paint.setStrokeWidth(0);
+                    if (y_min < border) {
+                        final int size = 20;
+                        Path path = new Path();
+                        path.moveTo(horstart + graphwidth / 2 + size * (3 * i - 1), border + size);// 此点为多边形的起点
+                        path.lineTo(horstart + graphwidth / 2 + size * (3 * i), border);
+                        path.lineTo(horstart + graphwidth / 2 + size * (3 * i + 1), border + size);
+                        path.close(); // 使这些点构成封闭的多边形
+                        canvas.drawPath(path, paint);
+                    } else if (y_max > graphheight + border) {
+                        final int size = 20;
+                        Path path = new Path();
+                        path.moveTo(horstart + graphwidth / 2 + size * (3 * i - 1), graphheight + border - size);// 此点为多边形的起点
+                        path.lineTo(horstart + graphwidth / 2 + size * (3 * i), graphheight + border);
+                        path.lineTo(horstart + graphwidth / 2 + size * (3 * i + 1), graphheight + border - size);
+                        path.close(); // 使这些点构成封闭的多边形
+                        canvas.drawPath(path, paint);
+                    }
+                }
             }
-
             if (showLegend) drawLegend(canvas, height, width);
         }
-
         private void onMoveGesture(int dx,int dy) {
             // view port update
             if (viewportSize != 0) {
@@ -209,7 +252,9 @@ abstract public class GraphView extends LinearLayout {
                     ||(now_x <0 && !pointer_width_mode)) {
                 if (Math.abs(pointer_width) > 10
                         && Math.abs(now_x) > 10
-                        && Math.abs(pointer_width-now_x) >4) {
+                        && Math.abs(pointer_width-now_x) >4
+                        && Math.abs(pointer_height-now_y)<Math.abs(pointer_width-now_x)
+                        ) {
                     double minX = getMinX(true);
                     double maxX = getMaxX(true);
                     //goto center
@@ -230,7 +275,9 @@ abstract public class GraphView extends LinearLayout {
                     ||(now_y <0 && !pointer_height_mode)) {
                 if (Math.abs(pointer_height) > 15
                         && Math.abs(now_y) > 15
-                        && Math.abs(pointer_height-now_y) >4) {
+                        && Math.abs(pointer_height-now_y) >4
+                        && Math.abs(pointer_height-now_y)>Math.abs(pointer_width-now_x)
+                    ) {
                     double minY = getMinY();
                     double maxY = getMaxY();
                     double size = manualMaxYValue-manualMinYValue;
@@ -302,21 +349,19 @@ abstract public class GraphView extends LinearLayout {
                     lastTouchEventY = 0;
                     handled = true;
                 case MotionEvent.ACTION_MOVE:
-                        if (touch_mode >= 2) {
-
+                        if (touch_mode >= 2 &&scalable) {
                             OnPointersTouch(event);
-
                         }
                         else if(scrollingStarted) {
 
                             if (lastTouchEventX != 0 || lastTouchEventY != 0) {
                                 int x_different = (int) event.getX() - lastTouchEventX;
                                 int y_different = (int) event.getY() - lastTouchEventY;
-                                if (x_different > 1
-                                        || x_different < -1
-                                        || y_different > 1
-                                        || y_different < -1) {
-                                    onMoveGesture(x_different, y_different);
+                                if (Math.abs(x_different) > Math.abs(y_different)) {
+                                    onMoveGesture(x_different, 0);
+                                }
+                                else{
+                                    onMoveGesture(0, y_different);
                                 }
                             }
                             lastTouchEventX = (int) event.getX();
@@ -1050,42 +1095,6 @@ abstract public class GraphView extends LinearLayout {
      */
     synchronized public void setScalable(boolean scalable) {
         this.scalable = scalable;
-        if (scalable == true && scaleDetector == null) {
-            scrollable = true; // automatically forces this
-            scaleDetector = new ScaleGestureDetector(getContext(), new ScaleGestureDetector.SimpleOnScaleGestureListener() {
-                @Override
-                public boolean onScale(ScaleGestureDetector detector) {
-                    double center = viewportStart + viewportSize / 2;
-                    viewportSize /= detector.getScaleFactor();
-                    viewportStart = center - viewportSize / 2;
-
-                    // viewportStart must not be < minX
-                    double minX = getMinX(true);
-                    if (viewportStart < minX) {
-                        viewportStart = minX;
-                    }
-
-                    // viewportStart + viewportSize must not be > maxX
-                    double maxX = getMaxX(true);
-                    if (viewportSize == 0) {
-                        viewportSize = maxX;
-                    }
-                    double overlap = viewportStart + viewportSize - maxX;
-                    if (overlap > 0) {
-                        // scroll left
-                        if (viewportStart - overlap > minX) {
-                            viewportStart -= overlap;
-                        } else {
-                            // maximal scale
-                            viewportStart = minX;
-                            viewportSize = maxX - viewportStart;
-                        }
-                    }
-                    redrawAll();
-                    return true;
-                }
-            });
-        }
     }
 
     /**
